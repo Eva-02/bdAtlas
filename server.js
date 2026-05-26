@@ -1,7 +1,9 @@
 const express = require('express');
 const cors = require('cors');
 const dotenv = require('dotenv');
+const swaggerUi = require('swagger-ui-express');
 const connectDB = require('./src/config/db');
+const swaggerSpec = require('./src/config/swagger');
 const authRoutes = require('./src/routes/auth');
 const userRoutes = require('./src/routes/users');
 const productRoutes = require('./src/routes/products');
@@ -24,11 +26,13 @@ seedAdmin().catch((error) => {
   console.error('Error al crear admin inicial:', error.message);
 });
 
+app.use('/api-docs', swaggerUi.serve, swaggerUi.setup(swaggerSpec));
+
 app.get('/', (req, res) => {
   res.json({ message: 'API de logística de inventarios en ejecución' });
 });
 
-console.log('Mounting routes: /auth, /users, /products, /inventory, /movements');
+console.log('Mounting routes: /api-docs, /auth, /users, /products, /inventory, /movements');
 app.use('/auth', authRoutes);
 app.use('/users', verifyToken, userRoutes);
 app.use('/products', verifyToken, productRoutes);
