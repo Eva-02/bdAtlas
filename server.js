@@ -28,6 +28,7 @@ app.get('/', (req, res) => {
   res.json({ message: 'API de logística de inventarios en ejecución' });
 });
 
+console.log('Mounting routes: /auth, /users, /products, /inventory, /movements');
 app.use('/auth', authRoutes);
 app.use('/users', verifyToken, userRoutes);
 app.use('/products', verifyToken, productRoutes);
