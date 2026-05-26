@@ -2,25 +2,26 @@ const express = require('express');
 const bcrypt = require('bcryptjs');
 const User = require('../models/User');
 const { requireRole } = require('../middleware/auth');
+const asyncHandler = require('../middleware/asyncHandler');
 
 const router = express.Router();
 
 router.use(requireRole(['admin']));
 
-router.get('/', async (req, res) => {
+router.get('/', asyncHandler(async (req, res) => {
   const users = await User.find().select('-password');
   res.json(users);
-});
+}));
 
-router.get('/:id', async (req, res) => {
+router.get('/:id', asyncHandler(async (req, res) => {
   const user = await User.findById(req.params.id).select('-password');
   if (!user) {
     return res.status(404).json({ error: 'Usuario no encontrado' });
   }
   res.json(user);
-});
+}));
 
-router.post('/', async (req, res) => {
+router.post('/', asyncHandler(async (req, res) => {
   const { name, email, password, role = 'user' } = req.body;
   if (!name || !email || !password) {
     return res.status(400).json({ error: 'name, email y password son obligatorios' });
@@ -34,7 +35,7 @@ router.post('/', async (req, res) => {
   res.status(201).json({ _id: user._id, name: user.name, email: user.email, role: user.role });
 });
 
-router.put('/:id', async (req, res) => {
+router.put('/:id', asyncHandler(async (req, res) => {
   const updates = { ...req.body };
   if (updates.password) {
     updates.password = await bcrypt.hash(updates.password, 10);
@@ -44,14 +45,14 @@ router.put('/:id', async (req, res) => {
     return res.status(404).json({ error: 'Usuario no encontrado' });
   }
   res.json(user);
-});
+}));
 
-router.delete('/:id', async (req, res) => {
+router.delete('/:id', asyncHandler(async (req, res) => {
   const user = await User.findByIdAndDelete(req.params.id);
   if (!user) {
     return res.status(404).json({ error: 'Usuario no encontrado' });
   }
   res.status(204).send();
-});
+}));
 
 module.exports = router;

@@ -10,6 +10,8 @@ const productRoutes = require('./src/routes/products');
 const inventoryRoutes = require('./src/routes/inventory');
 const movementRoutes = require('./src/routes/movements');
 const { verifyToken } = require('./src/middleware/auth');
+const asyncHandler = require('./src/middleware/asyncHandler');
+const User = require('./src/models/User');
 
 dotenv.config();
 
@@ -28,11 +30,19 @@ seedAdmin().catch((error) => {
 
 app.use('/api-docs', swaggerUi.serve, swaggerUi.setup(swaggerSpec));
 
+app.get('/me', verifyToken, asyncHandler(async (req, res) => {
+  const user = await User.findById(req.user.id).select('-password');
+  if (!user) {
+    return res.status(404).json({ error: 'Usuario no encontrado' });
+  }
+  res.json(user);
+}));
+
 app.get('/', (req, res) => {
   res.json({ message: 'API de logística de inventarios en ejecución' });
 });
 
-console.log('Mounting routes: /api-docs, /auth, /users, /products, /inventory, /movements');
+console.log('Mounting routes: /api-docs, /me, /auth, /users, /products, /inventory, /movements');
 app.use('/auth', authRoutes);
 app.use('/users', verifyToken, userRoutes);
 app.use('/products', verifyToken, productRoutes);

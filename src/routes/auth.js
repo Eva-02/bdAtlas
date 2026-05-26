@@ -3,6 +3,7 @@ const bcrypt = require('bcryptjs');
 const jwt = require('jsonwebtoken');
 const User = require('../models/User');
 const { verifyToken, requireRole } = require('../middleware/auth');
+const asyncHandler = require('../middleware/asyncHandler');
 
 const router = express.Router();
 
@@ -11,7 +12,7 @@ const createToken = (user) => {
   return jwt.sign(payload, process.env.JWT_SECRET || 'secret', { expiresIn: '8h' });
 };
 
-router.post('/login', async (req, res) => {
+router.post('/login', asyncHandler(async (req, res) => {
   const { email, password } = req.body;
   if (!email || !password) {
     return res.status(400).json({ error: 'Email y contraseña son obligatorios' });
@@ -29,9 +30,9 @@ router.post('/login', async (req, res) => {
 
   const token = createToken(user);
   res.json({ token, user: { _id: user._id, name: user.name, email: user.email, role: user.role } });
-});
+}));
 
-router.post('/register', verifyToken, requireRole(['admin']), async (req, res) => {
+router.post('/register', verifyToken, requireRole(['admin']), asyncHandler(async (req, res) => {
   const { name, email, password, role = 'user' } = req.body;
   if (!name || !email || !password) {
     return res.status(400).json({ error: 'name, email y password son obligatorios' });
@@ -47,12 +48,12 @@ router.post('/register', verifyToken, requireRole(['admin']), async (req, res) =
   res.status(201).json({ user: { _id: user._id, name: user.name, email: user.email, role: user.role } });
 });
 
-router.get('/me', verifyToken, async (req, res) => {
+router.get('/me', verifyToken, asyncHandler(async (req, res) => {
   const user = await User.findById(req.user.id).select('-password');
   if (!user) {
     return res.status(404).json({ error: 'Usuario no encontrado' });
   }
   res.json(user);
-});
+}));
 
 module.exports = router;
