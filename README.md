@@ -72,6 +72,14 @@ npm start
 3. Usar `POST /auth/login` para obtener el token.
 4. Enviar `Authorization: Bearer <token>` en las rutas protegidas.
 
+## Documentación Swagger
+
+La API expone su documentación interactiva en:
+
+- `https://bdatlas.onrender.com/api-docs`
+
+Desde allí puedes ver los esquemas, probar endpoints y leer las rutas protegidas con JWT.
+
 ## Notas
 
 - La API está diseñada como MVP y puede extenderse con auditoría, reportes, control avanzado de stock y gestión multi-almacén.
